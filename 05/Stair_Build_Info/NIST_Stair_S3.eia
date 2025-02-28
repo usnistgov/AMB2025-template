@@ -1,0 +1,185 @@
+(NIST_Stair_S3_P1)
+(Last edited by SG on 11/6/24)
+
+G461 (Additive Offset Cancel)
+/9 G442 K1.0 (Additive Reset)
+/9 M473 (Wire Current Reset)
+
+#901=3025. (E: LASER POWER    [W])
+#902=25. (I: NOZZLE G   [L/min])
+#903=25. (J: SHIELD G   [L/min])
+#904=120. (F: WIRE FEED SPEED   [in/min])
+#905=500. (H: HOT WIRE POWER [W])
+
+
+G0 G17 G21 G90 G94 G55
+G40 G49 G80 G67 G69
+
+(PLACE HOLDER TO INDICATE TOOL HAS CHANGED)
+G65<SUBBA62>
+T29M6
+
+/9 M613 (MIST COLLECTOR ON)
+M642 (SET 2 Rotary Select)
+G460 (WORK SHIFT FOR AM HEAD)
+/9 M472 (Turn on welder controller - TAF10.26.22)
+/9 M441 (Turn Process Gas On - TAF02.20.2023)
+
+G49
+G69
+
+G28 G91 Z0. W0.
+G28 X0. Y0. V0.
+G28 A0. B0. C0. 
+G55 G90
+M46
+M43
+G55 
+G61.1 P2
+
+(Set 5+6/6)
+
+#701=102. (work plane height - initial)
+#700=#701+65. (clearance height - initial)
+
+G68.2 P0 X-50.8 Y76.2 Z#700 I0. J0. K0.
+G53.1 P1
+G0 X0. V0. 
+G0 W0.0
+G49
+G69
+G0 G43.4 H29 X-50.8 V76.2 W#700 
+G0 W#701 A0. C0. 
+
+(Parameters)
+#702=1. (loop iterator)
+#703=#702MOD2. (layer selector)
+#704=25. (total number of layers)
+#705=2. (layer height)
+
+#750=200. (Scan speed; mm/min)
+
+#760=60. (Dwell time; s)
+
+IF[#702GT#704]GOTO12 (End Program)
+
+IF[#702LE#704AND#703NE0.]GOTO10 (Odd Layer)
+IF[#702LE#704AND#703EQ0.]GOTO11 (Even Layer)
+
+
+(Odd layer)
+N10
+
+(Stair: 1)
+G0 X-50.8 V76.2 
+G0 W#701
+/1 G910 E#901 I#902 J#903 F#904 H#905
+/9 G441 K1.0
+G1 V25.4 F#750 
+
+/9 G442 K1.0
+G0 W#700 
+
+
+( Stair: 2 )
+G0 X0. V76.2 
+G0 W#701 
+/1 G910 E#901 I#902 J#903 F#904 H#905
+/9 G441 K1.0
+G1 V25.4 F#750 
+
+/9 G442 K1.0
+G0 W#700 
+
+
+( Stair: 3 )
+G0 X50.8 V76.2 
+G0 W#701 
+/1 G910 E#901 I#902 J#903 F#904 H#905
+/9 G441 K1.0
+G1 V25.4 F#750 
+
+/9 G442 K1.0
+/3 G4 X#760
+G0 W#700 
+
+(Odd layer complete)
+
+(increment parameters)
+#700=#700+#705 (increment clearance plane height by layer thickness per printed layer)
+#701=#701+#705 (increment work plane height by layer thickness per printed layer)
+#702=#702+1. (loop iterator increment)
+#703=#702MOD2. (layer selector recalc)
+
+IF[#702GT#704]GOTO12 (End Program)
+
+IF[#702LE#704AND#703NE0.]GOTO10 (Odd Layer)
+IF[#702LE#704AND#703EQ0.]GOTO11 (Even Layer)
+
+(Even layer)
+N11
+
+(Stair: 1)
+G0 X-50.8 V25.4 
+G0 W#701
+/1 G910 E#901 I#902 J#903 F#904 H#905
+/9 G441 K1.0
+G1 V76.2 F#750 
+
+/9 G442 K1.0
+G0 W#700 
+
+
+( Stair: 2 )
+G0 X0. V25.4 
+G0 W#701 
+/1 G910 E#901 I#902 J#903 F#904 H#905
+/9 G441 K1.0
+G1 V76.2 F#750 
+
+/9 G442 K1.0
+G0 W#700 
+
+
+( Stair: 3 )
+G0 X50.8 V25.4 
+G0 W#701 
+/1 G910 E#901 I#902 J#903 F#904 H#905
+/9 G441 K1.0
+G1 V76.2 F#750 
+
+
+
+/9 G442 K1.0
+/3 G4 X#760
+G0 W#700 
+
+(Even layer complete)
+
+(increment parameters)
+#700=#700+#705 (increment clearance plane height by layer thickness per printed layer)
+#701=#701+#705 (increment work plane height by layer thickness per printed layer)
+#702=#702+1. (loop iterator increment)
+#703=#702MOD2. (layer selector recalc)
+
+IF[#702GT#704]GOTO12 (End Program)
+
+IF[#702LE#704AND#703NE0.]GOTO10 (Odd Layer)
+IF[#702LE#704AND#703EQ0.]GOTO11 (Even Layer)
+
+(Program End)
+N12
+
+G49
+G64
+G69
+/9 M473 (Weld Controller OFF - TAF10.26.22)
+/9 M442 (Turn Process Gas On - TAF02.20.2023)
+G461 (LASER OFFSET CANCEL)
+G28 G91 Z0. W0.
+G28 X0. Y0. V0. 
+M46 M43
+G28 A0. B0. C0.
+M47 M44
+M30
+%
